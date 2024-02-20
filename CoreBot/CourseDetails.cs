@@ -5,12 +5,8 @@
 
 namespace CoreBot
 {
-    public class BookingDetails
+    public class CourseDetails
     {
-        public string Destination { get; set; }
-
-        public string Origin { get; set; }
-
-        public string TravelDate { get; set; }
+        public string Name { get; set; }
     }
 }
