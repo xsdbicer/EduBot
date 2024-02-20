@@ -1,4 +1,5 @@
 # EduBot
+[edX api](https://courses.edx.org/api-docs/#/)
 
 EduBot, edX platformundan kurs bilgilerini çekmek için kullanılan basit bir tutorial projesidir.
 
@@ -18,4 +19,4 @@ foreach (var course in courses)
     Console.WriteLine(course.Name);
 }
 
-[edX api](https://courses.edx.org/api-docs/#/)
+
