@@ -1,7 +1,9 @@
-﻿using Microsoft.Bot.Builder;
+﻿using CoreBot.CognitiveModels;
+using Microsoft.Bot.Builder;
 using Microsoft.Bot.Builder.Dialogs;
 using Microsoft.Bot.Schema;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +31,8 @@ namespace CoreBot.Dialogs
 
             // CourseDialog'u ekleyin
             AddDialog(new CourseDialog(new CourseApiClient(new HttpClient())));
+            AddDialog(new CourseDetailsDialog(new CourseApiClient(new HttpClient())));
+
 
             InitialDialogId = nameof(WaterfallDialog);
         }
@@ -43,23 +47,37 @@ namespace CoreBot.Dialogs
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var userInput = stepContext.Result?.ToString()?.ToLowerInvariant();
+            UserIntent intent = IntentDetector.DetectIntent(userInput);
 
-            if (!string.IsNullOrEmpty(userInput) && userInput.Contains("book a course"))
+            switch (intent)
             {
-                var messageText = "Course booking is in progress...";
-                var message = MessageFactory.Text(messageText, messageText, InputHints.IgnoringInput);
-                await stepContext.BeginDialogAsync(nameof(CourseDialog), null, cancellationToken);
-                await stepContext.Context.SendActivityAsync(message, cancellationToken);
+                case UserIntent.BookCourse:
+                    var messageText = "Course booking is in progress...";
+                    var message = MessageFactory.Text(messageText, messageText, InputHints.IgnoringInput);
+                    await stepContext.Context.SendActivityAsync(message, cancellationToken);
+                    await stepContext.BeginDialogAsync(nameof(CourseDialog), null, cancellationToken);
+                    break;
+                case UserIntent.CancelCourse:
+                    Console.WriteLine("User wants to cancel a course");
+                    // İlgili işlemleri gerçekleştirin
+                    break;
+                case UserIntent.GetCourseDetails:
+                    var info = "Course detail booking is in progress...";
+                    var text = MessageFactory.Text(info, info, InputHints.IgnoringInput);
+                    await stepContext.Context.SendActivityAsync(text, cancellationToken);
+                    await stepContext.BeginDialogAsync(nameof(CourseDetailsDialog), null, cancellationToken);
+                    break;
+                case UserIntent.None:
+                    Console.WriteLine("Intent not recognized");
+                    break;
+                default:
+                    Console.WriteLine("Unknown intent");
+                    break;
             }
-            else
-            {
-                var messageText = "Sorry, I couldn't understand your request.";
-                var message = MessageFactory.Text(messageText, messageText, InputHints.IgnoringInput);
-                await stepContext.Context.SendActivityAsync(message, cancellationToken);
-            }
+
 
             var promptMessage = "What else can I do for you?";
-            return await stepContext.ReplaceDialogAsync(InitialDialogId, promptMessage, cancellationToken);
+            return await stepContext.ReplaceDialogAsync(nameof(MainDialog), promptMessage, cancellationToken);
         }
     }
 }

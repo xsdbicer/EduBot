@@ -1,31 +1,29 @@
-﻿using Microsoft.Bot.Builder;
-using Microsoft.Bot.Builder.Dialogs;
-using Microsoft.Bot.Schema;
-using System.Collections.Generic;
-using System.Threading;
+﻿using Microsoft.Bot.Builder.Dialogs;
 using System.Threading.Tasks;
+using System.Threading;
 
 namespace CoreBot.Dialogs
 {
-    public class CourseDialog : ComponentDialog
+    public class CourseDetailsDialog:ComponentDialog
     {
         private readonly CourseApiClient _courseApiClient;
 
-        public CourseDialog(CourseApiClient courseApiClient)
-            : base(nameof(CourseDialog))
+        public CourseDetailsDialog(CourseApiClient courseApiClient)
+            : base(nameof(CourseDetailsDialog))
         {
             _courseApiClient = courseApiClient;
 
+           
             AddDialog(new WaterfallDialog(nameof(WaterfallDialog), new WaterfallStep[]
-            {
-                ShowCoursesStepAsync,
-                FinalStepAsync,
-            }));
-            
+        {
+            ShowCoursesDetailsStepAsync,
+            FinalStepAsync,
+        }));
             InitialDialogId = nameof(WaterfallDialog);
         }
 
-        private async Task<DialogTurnResult> ShowCoursesStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
+
+        private async Task<DialogTurnResult> ShowCoursesDetailsStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             var courses = await _courseApiClient.GetCoursesAsync();
 
@@ -34,7 +32,7 @@ namespace CoreBot.Dialogs
                 var message = "Here are the available courses:\n";
                 foreach (var course in courses)
                 {
-                    message += $"- {course.Name}\n";
+                    message += $"- {course.Name}\n {course.Description}";
                 }
 
                 await stepContext.Context.SendActivityAsync(message, cancellationToken: cancellationToken);
@@ -46,6 +44,7 @@ namespace CoreBot.Dialogs
 
             return await stepContext.NextAsync(cancellationToken: cancellationToken);
         }
+
         private async Task<DialogTurnResult> FinalStepAsync(WaterfallStepContext stepContext, CancellationToken cancellationToken)
         {
             return await stepContext.EndDialogAsync(cancellationToken: cancellationToken);
