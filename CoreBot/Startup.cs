@@ -4,7 +4,9 @@
 // Generated with Bot Builder V4 SDK Template for Visual Studio CoreBot v4.18.1
 
 using CoreBot.Bots;
+using CoreBot.CognitiveModels;
 using CoreBot.Dialogs;
+using CoreBot.Models;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Bot.Builder;
@@ -42,6 +44,11 @@ namespace CoreBot
 
             // Register the BookingDialog.
             services.AddSingleton<CourseDialog>();
+            services.AddSingleton<CourseDetailsDialog>();
+            services.AddSingleton<Courses>();
+            services.AddSingleton<IntentDetector>();
+
+
 
             services.AddSingleton<CourseApiClient>();
 
